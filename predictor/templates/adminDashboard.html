@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Styles */
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 20px;
+            color: white;
+        }
+        .sidebar a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .main-content {
+            margin-left: 250px; /* Adjust for sidebar width */
+            padding: 20px;
+        }
+        .chart-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            height: 300px; /* Fixed height for charts */
+        }
+        .table-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="#" class="navbar-brand mb-4">HeartPredict Admin</a>
+        <a href="{% url 'admin-dashboard' %}">Dashboard</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Navbar -->
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <span class="navbar-brand">Admin Dashboard</span>
+            </div>
+        </nav>
+
+        <!-- Stats Cards -->
+        <div class="row my-4">
+            <div class="col-md-3 mb-3">
+                <div class="card bg-success text-white text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Users</h5>
+                        <p class="card-text">{{ users.count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-warning text-dark text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">High Risk Predictions</h5>
+                        <p class="card-text">{{ high_risk_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-info text-white text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Low Risk Predictions</h5>
+                        <p class="card-text">{{ low_risk_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-primary text-white text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Avg Age</h5>
+                        <p class="card-text">{{ avg_age|floatformat:1 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-container">
+            <h5 class="mb-4">All Users</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Last Login</th>
+                        <th>Total Predictions</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.first_name }}</td>
+                            <td>{{ user.last_name }}</td>
+                            <td>{{ user.last_login|date:"Y-m-d H:i" }}</td>
+                            <td>{{ user.prediction_set.count }}</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="#" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row my-4">
+            <!-- High-Risk vs. Low-Risk Pie Chart -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="text-center mb-4">High-Risk vs. Low-Risk Predictions</h5>
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Risk by Gender -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="text-center mb-4">Risk by Gender</h5>
+                    <canvas id="genderRiskChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Most Common Risk Factors -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="text-center mb-4">Most Common Risk Factors</h5>
+                    <canvas id="riskFactorsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Scripts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Data from Django context
+            var highRisk = parseInt("{{ high_risk_count|default:0 }}");
+            var lowRisk = parseInt("{{ low_risk_count|default:0 }}");
+            var maleHighRisk = parseInt("{{ male_high_risk|default:0 }}");
+            var maleLowRisk = parseInt("{{ male_low_risk|default:0 }}");
+            var femaleHighRisk = parseInt("{{ female_high_risk|default:0 }}");
+            var femaleLowRisk = parseInt("{{ female_low_risk|default:0 }}");
+            var avgAge = parseFloat("{{ avg_age|default:0 }}");
+            var avgChol = parseFloat("{{ avg_chol|default:0 }}");
+            var avgTrestbps = parseFloat("{{ avg_trestbps|default:0 }}");
+
+            // High-Risk vs. Low-Risk Pie Chart
+            var riskCtx = document.getElementById('riskChart').getContext('2d');
+            new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Low Risk', 'High Risk'],
+                    datasets: [{
+                        data: [lowRisk, highRisk],
+                        backgroundColor: ['#36A2EB', '#FF6384']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+
+            // Risk by Gender Chart
+            var genderRiskCtx = document.getElementById('genderRiskChart').getContext('2d');
+            new Chart(genderRiskCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Male (High Risk)', 'Male (Low Risk)', 'Female (High Risk)', 'Female (Low Risk)'],
+                    datasets: [{
+                        label: 'Count',
+                        data: [maleHighRisk, maleLowRisk, femaleHighRisk, femaleLowRisk],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FF9F40', '#4BC0C0']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        y: { title: { display: true, text: 'Count' } }
+                    }
+                }
+            });
+
+            // Most Common Risk Factors Chart
+            var riskFactorsCtx = document.getElementById('riskFactorsChart').getContext('2d');
+            new Chart(riskFactorsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Avg Age', 'Avg Cholesterol', 'Avg Blood Pressure'],
+                    datasets: [{
+                        label: 'Value',
+                        data: [avgAge, avgChol, avgTrestbps],
+                        backgroundColor: ['#36A2EB', '#FF6384', '#FF9F40']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        y: { title: { display: true, text: 'Value' } }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

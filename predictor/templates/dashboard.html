@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Styles */
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 20px;
+            color: white;
+        }
+        .sidebar a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .main-content {
+            margin-left: 250px; /* Adjust for sidebar width */
+            padding: 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .card-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .chart-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            height: 300px; /* Fixed height for charts */
+        }
+        .prediction-result {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .prediction-result.low-risk {
+            background-color: #d4edda; /* Light green for low risk */
+            color: #155724; /* Dark green text */
+        }
+        .prediction-result.high-risk {
+            background-color: #f8d7da; /* Light red for high risk */
+            color: #721c24; /* Dark red text */
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="#" class="navbar-brand mb-4">HeartPredict</a>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'predict' %}">New Prediction</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Navbar -->
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <span class="navbar-brand">Welcome, {{ user.username }}!</span>
+                <a href="{% url 'predict' %}" class="btn btn-danger">New Prediction</a>
+            </div>
+        </nav>
+
+        <!-- Stats Cards -->
+        <div class="alert alert-info">
+              <h4>Risk Level: {{ risk_level }}</h4>
+              <p>{{ advice }}</p>
+       </div>
+        <div class="row my-4">
+            <div class="col-md-4 mb-3">
+                <div class="card bg-success text-white text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Predictions</h5>
+                        <p class="card-text">{{ total_predictions }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-warning text-dark text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">High Risk Predictions</h5>
+                        <p class="card-text">{{ high_risk_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-info text-white text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Low Risk Predictions</h5>
+                        <p class="card-text">{{ low_risk_count }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row my-4">
+            <!-- High-Risk vs. Low-Risk Pie Chart -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="text-center mb-4">High-Risk vs. Low-Risk Predictions</h5>
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Prediction Confidence Distribution -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="text-center mb-4">Prediction Confidence Distribution</h5>
+                    <canvas id="confidenceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Age vs. Cholesterol Scatter Plot -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="text-center mb-4">Age vs. Cholesterol Levels</h5>
+                    <canvas id="ageCholChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Resting Blood Pressure vs. Maximum Heart Rate Scatter Plot -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="text-center mb-4">Resting Blood Pressure vs. Maximum Heart Rate</h5>
+                    <canvas id="trestbpsThalachChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prediction Results -->
+        {% if prediction_result %}
+            <div class="row my-4">
+                <div class="col-md-8 mx-auto">
+                    <div class="prediction-result {% if prediction_result == 1 %}high-risk{% else %}low-risk{% endif %}">
+                        Prediction: {% if prediction_result == 1 %}High Risk{% else %}Low Risk{% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Chart Scripts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Data from Django context
+            var lowRisk = parseInt("{{ low_risk_count|default:0 }}");
+            var highRisk = parseInt("{{ high_risk_count|default:0 }}");
+            var probabilities = JSON.parse("{{ probabilities|default:'[]'|escapejs }}");
+            var ages = JSON.parse("{{ ages|default:'[]'|escapejs }}");
+            var chols = JSON.parse("{{ chols|default:'[]'|escapejs }}");
+            var trestbps = JSON.parse("{{ trestbps|default:'[]'|escapejs }}");
+            var thalach = JSON.parse("{{ thalach|default:'[]'|escapejs }}");
+
+            // Debugging: Log data to console
+            console.log("Low Risk:", lowRisk);
+            console.log("High Risk:", highRisk);
+            console.log("Probabilities:", probabilities);
+            console.log("Ages:", ages);
+            console.log("Cholesterol Levels:", chols);
+            console.log("Resting Blood Pressure:", trestbps);
+            console.log("Maximum Heart Rate:", thalach);
+
+            // High-Risk vs. Low-Risk Pie Chart
+            var riskCtx = document.getElementById('riskChart').getContext('2d');
+            new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Low Risk', 'High Risk'],
+                    datasets: [{
+                        data: [lowRisk, highRisk],
+                        backgroundColor: ['#36A2EB', '#FF6384']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Allow chart to resize
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+
+            // Prediction Confidence Distribution
+            var confidenceCtx = document.getElementById('confidenceChart').getContext('2d');
+            new Chart(confidenceCtx, {
+                type: 'bar',
+                data: {
+                    labels: probabilities.map((_, i) => `Bin ${i + 1}`),
+                    datasets: [{
+                        label: 'Confidence',
+                        data: probabilities,
+                        backgroundColor: '#4BC0C0'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Confidence Bins' } },
+                        y: { title: { display: true, text: 'Frequency' } }
+                    }
+                }
+            });
+
+            // Age vs. Cholesterol Scatter Plot
+            var ageCholCtx = document.getElementById('ageCholChart').getContext('2d');
+            new Chart(ageCholCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Age vs. Cholesterol',
+                        data: ages.map((age, i) => ({ x: age, y: chols[i] })),
+                        backgroundColor: '#FF9F40'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Age' } },
+                        y: { title: { display: true, text: 'Cholesterol Level' } }
+                    }
+                }
+            });
+
+            // Resting Blood Pressure vs. Maximum Heart Rate Scatter Plot
+            var trestbpsThalachCtx = document.getElementById('trestbpsThalachChart').getContext('2d');
+            new Chart(trestbpsThalachCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Resting BP vs. Max HR',
+                        data: trestbps.map((bp, i) => ({ x: bp, y: thalach[i] })),
+                        backgroundColor: '#9966FF'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Resting Blood Pressure' } },
+                        y: { title: { display: true, text: 'Maximum Heart Rate' } }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
