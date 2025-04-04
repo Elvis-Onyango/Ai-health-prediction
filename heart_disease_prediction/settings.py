@@ -70,8 +70,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'heart_disease_prediction.wsgi.application'
 
-LOGIN_URL = "login"
+LOGIN_URL = "predictor:login"
 
+AUTH_USER_MODEL = 'predictor.CustomUser' 
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Patient Profile - HeartPredict</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        .form-input {
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+        }
+        .form-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .profile-picture-container {
+            transition: all 0.3s ease;
+        }
+        .profile-picture-container:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 flex items-center justify-center p-4 md:p-8">
+
+    <div class="w-full max-w-2xl">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-user-circle text-blue-500 text-4xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800">Complete Your Patient Profile</h1>
+            <p class="text-gray-600 mt-2">Help us provide personalized care by sharing your information</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <form method="post" enctype="multipart/form-data" class="p-6 md:p-8">
+                {% csrf_token %}
+                
+                <!-- Profile Picture Upload -->
+                <div class="mb-8">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Profile Picture</label>
+                    <div class="flex items-center justify-center">
+                        <label class="profile-picture-container cursor-pointer">
+                            <div class="w-32 h-32 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative">
+                                <!-- Preview will appear here -->
+                                <div id="image-preview" class="absolute inset-0 bg-cover bg-center hidden"></div>
+                                <div id="upload-icon" class="text-gray-400">
+                                    <i class="fas fa-camera text-3xl"></i>
+                                    <p class="text-xs mt-2">Upload Photo</p>
+                                </div>
+                            </div>
+                            {{ form.profile_picture }}
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Contact Information Section -->
+                <div class="space-y-6 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                        <i class="fas fa-phone-alt text-blue-500 mr-2"></i>
+                        Contact Information
+                    </h3>
+                    
+                    <!-- Phone Number -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        <div class="relative">
+                            {{ form.phone }}
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-mobile-alt text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <div class="relative">
+                            {{ form.email }}
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-envelope text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Address -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Home Address</label>
+                        <div class="relative">
+                            {{ form.address }}
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-home text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical Information Section -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 flex items-center mb-4">
+                        <i class="fas fa-file-medical text-blue-500 mr-2"></i>
+                        Medical Information
+                    </h3>
+                    
+                    <!-- Medical History -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Medical History</label>
+                        {{ form.medical_history }}
+                        <p class="text-xs text-gray-500 mt-1">Please include any chronic conditions, allergies, or past surgeries</p>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="pt-6 border-t border-gray-200">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg shadow-sm transition-colors flex items-center justify-center">
+                        <i class="fas fa-save mr-2"></i> Complete Profile
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Privacy Note -->
+        <p class="text-center text-gray-500 text-sm mt-6">
+            <i class="fas fa-shield-alt mr-1"></i> Your information is protected by HIPAA compliance standards
+        </p>
+    </div>
+
+    <script>
+        // Profile picture preview functionality
+        document.getElementById('id_profile_picture').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('image-preview').style.backgroundImage = `url(${e.target.result})`;
+                    document.getElementById('image-preview').classList.remove('hidden');
+                    document.getElementById('upload-icon').classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

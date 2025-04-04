@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard | HealthPredict</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4e73df;
+            --success: #1cc88a;
+            --danger: #e74a3b;
+            --warning: #f6c23e;
+            --info: #36b9cc;
+            --secondary: #858796;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            min-height: 100vh;
+            width: 280px;
+            position: fixed;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            color: white;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar-brand {
+            height: 70px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 800;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sidebar-brand i {
+            margin-right: 0.5rem;
+        }
+        
+        .sidebar-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            margin: 0 1rem 1rem;
+        }
+        
+        .nav-item {
+            position: relative;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar .nav-link i {
+            font-size: 0.85rem;
+            margin-right: 0.25rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+        
+        /* Top Navigation */
+        .topbar {
+            height: 70px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            background-color: white;
+        }
+        
+        .topbar #sidebarToggle {
+            color: var(--dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        
+        .navbar-search {
+            width: 25rem;
+        }
+        
+        .topbar-divider {
+            width: 0;
+            border-right: 1px solid #e3e6f0;
+            height: calc(4.375rem - 2rem);
+            margin: auto 1rem;
+        }
+        
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e3e6f0;
+        }
+        
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            padding: 1rem 1.35rem;
+            font-weight: 700;
+            color: var(--dark);
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+        }
+        
+        .patient-card {
+            border-left: 4px solid var(--primary);
+        }
+        
+        .risk-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .risk-high {
+            background-color: var(--danger);
+        }
+        
+        .risk-low {
+            background-color: var(--success);
+        }
+        
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .topbar {
+                position: relative;
+            }
+            #sidebarToggle {
+                display: none;
+            }
+        }
+        
+        /* Custom utilities */
+        .badge-pill {
+            border-radius: 10rem;
+            padding: 0.35em 0.65em;
+            font-weight: 600;
+        }
+        
+        .health-metric {
+            border-left: 3px solid;
+            padding-left: 10px;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-heartbeat"></i>
+            <span>HealthPredict MD</span>
+        </div>
+        
+        <hr class="sidebar-divider">
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="#" class="nav-link active">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-fw fa-user-injured"></i>
+                    <span>Patients</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-fw fa-calendar-check"></i>
+                    <span>Appointments</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-fw fa-prescription"></i>
+                    <span>Prescriptions</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-fw fa-chart-line"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
+            
+            <hr class="sidebar-divider">
+            
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navigation -->
+        <nav class="navbar navbar-expand topbar mb-4 static-top shadow">
+            <div class="container-fluid">
+                <button id="sidebarToggle" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                
+                <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                    <div class="input-group">
+                        <input type="text" class="form-control bg-light border-0 small" placeholder="Search patients...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button">
+                                <i class="fas fa-search fa-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown no-arrow mx-1">
+                        <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell fa-fw"></i>
+                            <span class="badge badge-danger badge-counter">3+</span>
+                        </a>
+                        <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in">
+                            <h6 class="dropdown-header">Alerts Center</h6>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <div class="mr-3">
+                                    <div class="icon-circle bg-primary">
+                                        <i class="fas fa-file-alt text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="small text-gray-500">Today</div>
+                                    <span class="font-weight-bold">New lab results available for John Doe</span>
+                                </div>
+                            </a>
+                            <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
+                        </div>
+                    </li>
+                    
+                    <div class="topbar-divider d-none d-sm-block"></div>
+                    
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <span class="mr-2 d-none d-lg-inline text-gray-600 small">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</span>
+                            <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Profile
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'predictor:logout' %}">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+            <!-- Page Heading -->
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Doctor Dashboard</h1>
+                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                    <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
+                </a>
+            </div>
+            
+            <!-- Doctor Profile Summary -->
+            <div class="row mb-4 fade-in">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Patients</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_patients }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        High Risk Patients</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ high_risk_count }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Recent Predictions</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ recent_count }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Pending Actions</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">5</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Doctor Information -->
+            <div class="row mb-4 fade-in" style="animation-delay: 0.2s">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Your Profile Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="small mb-1">Full Name</label>
+                                        <div class="form-control bg-light">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="small mb-1">Email</label>
+                                        <div class="form-control bg-light">{{ doctor.user.email }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="small mb-1">Specialization</label>
+                                        <div class="form-control bg-light">{{ doctor.specialization }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="small mb-1">Hospital/Clinic</label>
+                                        <div class="form-control bg-light">{{ doctor.hospital }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patients List -->
+            <div class="row fade-in" style="animation-delay: 0.3s">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Your Patients ({{ total_patients }})</h6>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                                    <a class="dropdown-item" href="#">Add New Patient</a>
+                                    <a class="dropdown-item" href="#">Export Data</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="accordion" id="patientsAccordion">
+                                {% for data in patient_data %}
+                                <div class="card patient-card mb-3">
+                                    <div class="card-header" id="heading{{ forloop.counter }}">
+                                        <h2 class="mb-0">
+                                            <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
+                                                <div>
+                                                    <span class="font-weight-bold">{{ data.patient.user.first_name }} {{ data.patient.user.last_name }}</span>
+                                                    <span class="text-muted small ml-2">{{ data.patient.user.email }}</span>
+                                                </div>
+                                                <div>
+                                                    {% if data.heart_predictions.last.prediction_result == 1 or data.kidney_predictions.last.prediction_result == 1 or data.diabetes_predictions.last.prediction_result == 1 %}
+                                                        <span class="badge bg-danger">High Risk</span>
+                                                    {% else %}
+                                                        <span class="badge bg-success">Low Risk</span>
+                                                    {% endif %}
+                                                    <i class="fas fa-chevron-down ml-2"></i>
+                                                </div>
+                                            </button>
+                                        </h2>
+                                    </div>
+
+                                    <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" data-parent="#patientsAccordion">
+                                        <div class="card-body">
+                                            <!-- Patient Overview -->
+                                            <div class="row mb-4">
+                                                <div class="col-md-4">
+                                                    <div class="health-metric border-primary">
+                                                        <div class="metric-value">{{ data.heart_predictions.count }}</div>
+                                                        <div class="metric-label">Heart Tests</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="health-metric border-info">
+                                                        <div class="metric-value">{{ data.kidney_predictions.count }}</div>
+                                                        <div class="metric-label">Kidney Tests</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="health-metric border-secondary">
+                                                        <div class="metric-value">{{ data.diabetes_predictions.count }}</div>
+                                                        <div class="metric-label">Diabetes Tests</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- AI Suggestions -->
+                                            {% if data.ai_suggestions %}
+                                            <div class="alert alert-info">
+                                                <h6><i class="fas fa-robot mr-2"></i>AI Health Recommendations</h6>
+                                                <ul class="mb-0">
+                                                    {% for suggestion in data.ai_suggestions %}
+                                                        <li>{{ suggestion }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <!-- Prediction History -->
+                                            <h6 class="mb-3">Prediction History</h6>
+                                            <ul class="nav nav-tabs" id="patientTabs{{ forloop.counter }}" role="tablist">
+                                                <li class="nav-item">
+                                                    <a class="nav-link active" id="heart-tab{{ forloop.counter }}" data-bs-toggle="tab" href="#heart{{ forloop.counter }}" role="tab">
+                                                        <i class="fas fa-heart text-danger mr-1"></i> Heart
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="kidney-tab{{ forloop.counter }}" data-bs-toggle="tab" href="#kidney{{ forloop.counter }}" role="tab">
+                                                        <i class="fas fa-kidneys text-info mr-1"></i> Kidney
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="diabetes-tab{{ forloop.counter }}" data-bs-toggle="tab" href="#diabetes{{ forloop.counter }}" role="tab">
+                                                        <i class="fas fa-vial text-secondary mr-1"></i> Diabetes
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                            
+                                            <div class="tab-content p-3 border border-top-0 rounded-bottom" id="patientTabContent{{ forloop.counter }}">
+                                                <!-- Heart Tab -->
+                                                <div class="tab-pane fade show active" id="heart{{ forloop.counter }}" role="tabpanel">
+                                                    {% if data.heart_predictions %}
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Date</th>
+                                                                    <th>Risk Level</th>
+                                                                    <th>Probability</th>
+                                                                    <th>Age</th>
+                                                                    <th>Cholesterol</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for prediction in data.heart_predictions %}
+                                                                <tr>
+                                                                    <td>{{ prediction.created_at|date:"M d, Y" }}</td>
+                                                                    <td>
+                                                                        {% if prediction.prediction_result == 0 %}
+                                                                            <span class="badge bg-success">Low</span>
+                                                                        {% else %}
+                                                                            <span class="badge bg-danger">High</span>
+                                                                        {% endif %}
+                                                                    </td>
+                                                                    <td>{{ prediction.probability }}%</td>
+                                                                    <td>{{ prediction.age }}</td>
+                                                                    <td>{{ prediction.chol }} mg/dL</td>
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    
+                                                    <div class="row mt-3">
+                                                        <div class="col-md-6">
+                                                            <div class="chart-container">
+                                                                <h6>Heart Risk Probability Trend</h6>
+                                                                <canvas id="heartProbChart{{ forloop.counter }}"></canvas>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="chart-container">
+                                                                <h6>Cholesterol Levels</h6>
+                                                                <canvas id="heartCholChart{{ forloop.counter }}"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {% else %}
+                                                    <div class="alert alert-warning">
+                                                        No heart disease predictions available for this patient.
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <!-- Kidney Tab -->
+                                                <div class="tab-pane fade" id="kidney{{ forloop.counter }}" role="tabpanel">
+                                                    {% if data.kidney_predictions %}
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Date</th>
+                                                                    <th>Risk Level</th>
+                                                                    <th>Probability</th>
+                                                                    <th>Blood Urea</th>
+                                                                    <th>Creatinine</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for prediction in data.kidney_predictions %}
+                                                                <tr>
+                                                                    <td>{{ prediction.created_at|date:"M d, Y" }}</td>
+                                                                    <td>
+                                                                        {% if prediction.prediction_result == 0 %}
+                                                                            <span class="badge bg-success">Low</span>
+                                                                        {% else %}
+                                                                            <span class="badge bg-danger">High</span>
+                                                                        {% endif %}
+                                                                    </td>
+                                                                    <td>{{ prediction.probability }}%</td>
+                                                                    <td>{{ prediction.blood_urea }} mg/dL</td>
+                                                                    <td>{{ prediction.serum_creatinine }} mg/dL</td>
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    
+                                                    <div class="row mt-3">
+                                                        <div class="col-md-6">
+                                                            <div class="chart-container">
+                                                                <h6>Kidney Risk Probability Trend</h6>
+                                                                <canvas id="kidneyProbChart{{ forloop.counter }}"></canvas>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="chart-container">
+                                                                <h6>Blood Urea Levels</h6>
+                                                                <canvas id="kidneyUreaChart{{ forloop.counter }}"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {% else %}
+                                                    <div class="alert alert-warning">
+                                                        No kidney disease predictions available for this patient.
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <!-- Diabetes Tab -->
+                                                <div class="tab-pane fade" id="diabetes{{ forloop.counter }}" role="tabpanel">
+                                                    {% if data.diabetes_predictions %}
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Date</th>
+                                                                    <th>Risk Level</th>
+                                                                    <th>Probability</th>
+                                                                    <th>BMI</th>
+                                                                    <th>High BP</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for prediction in data.diabetes_predictions %}
+                                                                <tr>
+                                                                    <td>{{ prediction.created_at|date:"M d, Y" }}</td>
+                                                                    <td>
+                                                                        {% if prediction.prediction_result == 0 %}
+                                                                            <span class="badge bg-success">Low</span>
+                                                                        {% else %}
+                                                                            <span class="badge bg-danger">High</span>
+                                                                        {% endif %}
+                                                                    </td>
+                                                                    <td>{{ prediction.probability }}%</td>
+                                                                    <td>{{ prediction.BMI }}</td>
+                                                                    <td>
+                                                                        {% if prediction.HighBP == 1 %}
+                                                                            <span class="badge bg-danger">Yes</span>
+                                                                        {% else %}
+                                                                            <span class="badge bg-success">No</span>
+                                                                        {% endif %}
+                                                                    </td>
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    
+                                                    <div class="row mt-3">
+                                                        <div class="col-md-6">
+                                                            <div class="chart-container">
+                                                                <h6>Diabetes Risk Probability Trend</h6>
+                                                                <canvas id="diabetesProbChart{{ forloop.counter }}"></canvas>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="chart-container">
+                                                                <h6>BMI Trend</h6>
+                                                                <canvas id="diabetesBmiChart{{ forloop.counter }}"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {% else %}
+                                                    <div class="alert alert-warning">
+                                                        No diabetes predictions available for this patient.
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="alert alert-info">
+                                    No patients found in your care. When you're assigned patients, they'll appear here.
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+    <!-- End of Main Content -->
+
+    <!-- Footer -->
+    <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Copyright &copy; HealthPredict MD {% now "Y" %}</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart Scripts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Toggle sidebar
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('toggled');
+                document.querySelector('.main-content').classList.toggle('toggled');
+            });
+            
+            // Initialize all patient charts
+            {% for data in patient_data %}
+                {% if data.heart_predictions %}
+                // Heart Probability Chart
+                new Chart(document.getElementById('heartProbChart{{ forloop.counter }}'), {
+                    type: 'line',
+                    data: {
+                        labels: JSON.parse('{{ data.heart_dates|escapejs }}'),
+                        datasets: [{
+                            label: 'Heart Risk Probability',
+                            data: JSON.parse('{{ data.heart_probabilities|escapejs }}'),
+                            borderColor: '#e74a3b',
+                            backgroundColor: 'rgba(231, 74, 59, 0.05)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Risk: ' + context.parsed.y + '%';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Heart Cholesterol Chart
+                new Chart(document.getElementById('heartCholChart{{ forloop.counter }}'), {
+                    type: 'bar',
+                    data: {
+                        labels: JSON.parse('{{ data.heart_dates|escapejs }}'),
+                        datasets: [{
+                            label: 'Cholesterol (mg/dL)',
+                            data: JSON.parse('{{ data.heart_chols|escapejs }}'),
+                            backgroundColor: '#4e73df'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+                {% endif %}
+                
+                {% if data.kidney_predictions %}
+                // Kidney Probability Chart
+                new Chart(document.getElementById('kidneyProbChart{{ forloop.counter }}'), {
+                    type: 'line',
+                    data: {
+                        labels: JSON.parse('{{ data.kidney_dates|escapejs }}'),
+                        datasets: [{
+                            label: 'Kidney Risk Probability',
+                            data: JSON.parse('{{ data.kidney_probabilities|escapejs }}'),
+                            borderColor: '#36b9cc',
+                            backgroundColor: 'rgba(54, 185, 204, 0.05)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Risk: ' + context.parsed.y + '%';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Kidney Urea Chart
+                new Chart(document.getElementById('kidneyUreaChart{{ forloop.counter }}'), {
+                    type: 'bar',
+                    data: {
+                        labels: JSON.parse('{{ data.kidney_dates|escapejs }}'),
+                        datasets: [{
+                            label: 'Blood Urea (mg/dL)',
+                            data: JSON.parse('{{ data.kidney_blood_urea|escapejs }}'),
+                            backgroundColor: '#36b9cc'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+                {% endif %}
+                
+                {% if data.diabetes_predictions %}
+                // Diabetes Probability Chart
+                new Chart(document.getElementById('diabetesProbChart{{ forloop.counter }}'), {
+                    type: 'line',
+                    data: {
+                        labels: JSON.parse('{{ data.diabetes_dates|escapejs }}'),
+                        datasets: [{
+                            label: 'Diabetes Risk Probability',
+                            data: JSON.parse('{{ data.diabetes_probabilities|escapejs }}'),
+                            borderColor: '#858796',
+                            backgroundColor: 'rgba(133, 135, 150, 0.05)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Risk: ' + context.parsed.y + '%';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Diabetes BMI Chart
+                new Chart(document.getElementById('diabetesBmiChart{{ forloop.counter }}'), {
+                    type: 'line',
+                    data: {
+                        labels: JSON.parse('{{ data.diabetes_dates|escapejs }}'),
+                        datasets: [{
+                            label: 'BMI',
+                            data: JSON.parse('{{ data.diabetes_bmi|escapejs }}'),
+                            borderColor: '#1cc88a',
+                            backgroundColor: 'rgba(28, 200, 138, 0.05)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+                {% endif %}
+            {% endfor %}
+        });
+    </script>
+</body>
+</html>

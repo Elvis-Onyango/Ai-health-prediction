@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kidney Disease Prediction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+        }
+        .radio-option input {
+            margin-right: 0.5rem;
+        }
+        .section-title {
+            position: relative;
+            padding-left: 1rem;
+        }
+        .section-title:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #3b82f6, #10b981);
+            border-radius: 4px;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-green-500 to-blue-600 flex justify-center items-center min-h-screen p-4">
+
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-gray-800 text-center mb-6">🩺 Kidney Disease Risk Assessment</h2>
+
+        {% if form.errors %}
+            <div class="p-4 mb-6 bg-red-50 border-l-4 border-red-400 rounded-lg">
+                <p class="text-sm text-red-600 font-medium">
+                    <strong>Please correct these errors:</strong>
+                </p>
+                <ul class="list-disc pl-5 mt-2 space-y-1">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ field|title }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if result %}
+            <div class="p-6 mb-6 rounded-lg shadow-md {% if result.prediction == 1 %}bg-red-50 border-l-4 border-red-400{% else %}bg-green-50 border-l-4 border-green-400{% endif %}">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        {% if result.prediction == 1 %}
+                            ⚠️
+                        {% else %}
+                            ✅
+                        {% endif %}
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-bold {% if result.prediction == 1 %}text-red-700{% else %}text-green-700{% endif %}">
+                            {% if result.prediction == 1 %}High Risk of Kidney Disease{% else %}Low Risk of Kidney Disease{% endif %}
+                        </h3>
+                        <div class="mt-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-{% if result.prediction == 1 %}red{% else %}green{% endif %}-500 h-2.5 rounded-full" 
+                                     style="width: {{ result.probability }}%"></div>
+                            </div>
+                            <p class="mt-1 text-sm {% if result.prediction == 1 %}text-red-600{% else %}text-green-600{% endif %}">
+                                Confidence: {{ result.probability }}%
+                            </p>
+                        </div>
+                        {% if result.prediction == 1 %}
+                            <p class="mt-2 text-sm text-red-600">
+                                We recommend consulting with a healthcare professional.
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-8" id="prediction-form" action="{% url 'predictor:predict-kidney' %}">
+            {% csrf_token %}
+            
+            <!-- Personal Information Section -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 section-title">Personal Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.age.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.age }}
+                            <span class="absolute right-3 top-2 text-gray-400 text-sm">yrs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vital Signs Section -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 section-title">Vital Signs</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.blood_pressure.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.blood_pressure }}
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Normal: 120/80 mmHg</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Urine Tests Section -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 section-title">Urine Tests</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.specific_gravity.label }}
+                        </label>
+                        {{ form.specific_gravity }}
+                        <p class="mt-1 text-xs text-gray-500">Normal: 1.005-1.030</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.albumin.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.albumin }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.sugar.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.sugar }}
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Normal: 0-0.8 mg/dL</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blood Tests Section -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 section-title">Blood Tests</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.blood_glucose_random.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.blood_glucose_random }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.blood_urea.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.blood_urea }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.serum_creatinine.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.serum_creatinine }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.sodium.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.sodium }}
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Normal: 135-145 mEq/L</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.potassium.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.potassium }}
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Normal: 3.5-5.0 mEq/L</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.hemoglobin.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.hemoglobin }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.packed_cell_volume.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.packed_cell_volume }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.white_blood_cells.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.white_blood_cells }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.red_blood_cells.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.red_blood_cells }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Microscopic Examination Section -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 section-title">Microscopic Examination</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            {{ form.red_blood_cells_normal.label }}
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            {% for choice in form.red_blood_cells_normal %}
+                            <label class="radio-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            {{ form.pus_cells_normal.label }}
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            {% for choice in form.pus_cells_normal %}
+                            <label class="radio-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            {{ form.pus_cell_clumps_present.label }}
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            {% for choice in form.pus_cell_clumps_present %}
+                            <label class="radio-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            {{ form.bacteria_present.label }}
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            {% for choice in form.bacteria_present %}
+                            <label class="radio-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical History Section -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 section-title">Medical History</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            {{ form.hypertension.label }}
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            {% for choice in form.hypertension %}
+                            <label class="radio-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            {{ form.diabetes_mellitus.label }}
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            {% for choice in form.diabetes_mellitus %}
+                            <label class="radio-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            {{ form.coronary_artery_disease.label }}
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            {% for choice in form.coronary_artery_disease %}
+                            <label class="radio-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Symptoms Section -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 section-title">Symptoms</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            {{ form.appetite.label }}
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            {% for choice in form.appetite %}
+                            <label class="radio-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            {{ form.pedal_edema.label }}
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            {% for choice in form.pedal_edema %}
+                            <label class="radio-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            {{ form.anemia.label }}
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            {% for choice in form.anemia %}
+                            <label class="radio-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all hover:shadow-xl active:scale-95">
+                🔍 Assess Kidney Disease Risk
+            </button>
+        </form>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'predictor:dashboard' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                ← Return to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Client-side validation
+        document.getElementById('prediction-form').addEventListener('submit', function(e) {
+            // Validate numeric ranges
+            const validateField = (fieldId, min, max, fieldName, unit) => {
+                const field = document.getElementById(fieldId);
+                const value = parseFloat(field.value);
+                if (isNaN(value) || value < min || value > max) {
+                    alert(`Please enter a valid ${fieldName} between ${min} and ${max} ${unit}`);
+                    field.focus();
+                    e.preventDefault();
+                    return false;
+                }
+                return true;
+            };
+
+            // Validate all numeric fields
+            if (!validateField('id_age', 0, 120, 'age', 'years')) return;
+            if (!validateField('id_blood_pressure', 0, 250, 'blood pressure', 'mmHg')) return;
+            if (!validateField('id_specific_gravity', 1.000, 1.050, 'specific gravity', '')) return;
+            if (!validateField('id_albumin', 0, 10, 'albumin', '')) return;
+            if (!validateField('id_sugar', 0, 10, 'sugar level', '')) return;
+            if (!validateField('id_blood_glucose_random', 0, 500, 'blood glucose', 'mg/dL')) return;
+            if (!validateField('id_blood_urea', 0, 200, 'blood urea', 'mg/dL')) return;
+            if (!validateField('id_serum_creatinine', 0, 15, 'serum creatinine', 'mg/dL')) return;
+            if (!validateField('id_sodium', 0, 200, 'sodium', 'mEq/L')) return;
+            if (!validateField('id_potassium', 0, 10, 'potassium', 'mEq/L')) return;
+            if (!validateField('id_hemoglobin', 0, 20, 'hemoglobin', 'gms')) return;
+            if (!validateField('id_packed_cell_volume', 0, 60, 'packed cell volume', '')) return;
+            if (!validateField('id_white_blood_cells', 0, 50000, 'white blood cells', 'cells/cmm')) return;
+            if (!validateField('id_red_blood_cells', 0, 10, 'red blood cells', 'millions/cmm')) return;
+        });
+    </script>
+</body>
+</html>

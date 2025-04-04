@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Doctor Profile - HeartPredict</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-user-md text-indigo-600 text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800">Complete Your Doctor Profile</h1>
+            <p class="text-gray-600 mt-2">Help us provide better care by completing your professional details</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="flex justify-between items-center mb-10 px-8">
+            <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">1</div>
+                <span class="text-sm text-indigo-600 mt-2">Basic Info</span>
+            </div>
+            <div class="h-1 flex-1 bg-gray-200 mx-2 relative">
+                <div class="absolute top-0 left-0 h-full bg-indigo-600 w-1/2"></div>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold">2</div>
+                <span class="text-sm text-gray-500 mt-2">Verification</span>
+            </div>
+            <div class="h-1 flex-1 bg-gray-200 mx-2"></div>
+            <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold">3</div>
+                <span class="text-sm text-gray-500 mt-2">Complete</span>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+            <form method="post" class="p-8">
+                {% csrf_token %}
+                
+                <!-- Professional Details Section -->
+                <div class="mb-10">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-briefcase-medical text-indigo-600 mr-3"></i>
+                        Professional Information
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Specialization -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Specialization *</label>
+                            <div class="relative">
+                                {{ form.specialization }}
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-stethoscope text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Experience -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Years of Experience *</label>
+                            <div class="relative">
+                                {{ form.experience_years }}
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-calendar-alt text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hospital -->
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Hospital/Clinic *</label>
+                        <div class="relative">
+                            {{ form.hospital }}
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-hospital text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Information Section -->
+                <div class="mb-10">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-address-card text-indigo-600 mr-3"></i>
+                        Contact Information
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Phone -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                            <div class="relative">
+                                {{ form.phone }}
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-phone text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Professional Email *</label>
+                            <div class="relative">
+                                {{ form.email }}
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-envelope text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="flex flex-col sm:flex-row justify-between items-center pt-6 border-t border-gray-100">
+                    <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium mb-4 sm:mb-0">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                    </a>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg shadow-sm transition-colors flex items-center">
+                        <i class="fas fa-save mr-2"></i> Save & Continue
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Footer Note -->
+        <p class="text-center text-gray-500 text-sm mt-8">
+            <i class="fas fa-lock mr-1"></i> Your information is securely encrypted and protected
+        </p>
+    </div>
+
+</body>
+</html>

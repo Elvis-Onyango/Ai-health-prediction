@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard | HealthPredict</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4e73df;
+            --success: #1cc88a;
+            --danger: #e74a3b;
+            --warning: #f6c23e;
+            --info: #36b9cc;
+            --secondary: #858796;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+        }
+        
+        body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        
+        /* Sidebar Styling */
+        .sidebar {
+            min-height: 100vh;
+            width: 250px;
+            position: fixed;
+            background: linear-gradient(180deg, var(--primary) 0%, #224abe 100%);
+            color: white;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar-brand {
+            height: 4.375rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, 
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 0.5rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+        
+        /* Top Navigation */
+        .topbar {
+            height: 4.375rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            background-color: white;
+        }
+        
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .risk-card {
+            border-left: 0.5rem solid;
+        }
+        
+        .risk-card.high-risk {
+            border-left-color: var(--danger);
+            background-color: rgba(231, 74, 59, 0.05);
+        }
+        
+        .risk-card.medium-risk {
+            border-left-color: var(--warning);
+            background-color: rgba(246, 194, 62, 0.05);
+        }
+        
+        .risk-card.low-risk {
+            border-left-color: var(--success);
+            background-color: rgba(28, 200, 138, 0.05);
+        }
+        
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .chart-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Profile Image */
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--light);
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* Utility Classes */
+        .text-xxs {
+            font-size: 0.7rem;
+        }
+        
+        .health-metric {
+            border-left: 3px solid;
+            padding-left: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-heartbeat me-2"></i>
+            <span>HealthPredict</span>
+        </div>
+        
+        <hr class="bg-white mx-3 my-1">
+        
+        <ul class="nav flex-column px-2">
+            <li class="nav-item fade-in" style="animation-delay: 0.1s">
+                <a href="{% url 'predictor:dashboard' %}" class="nav-link active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            
+            <li class="nav-item fade-in" style="animation-delay: 0.2s">
+                <a href="{% url 'predictor:predict-heart' %}" class="nav-link">
+                    <i class="fas fa-heart"></i>
+                    <span>Heart Prediction</span>
+                </a>
+            </li>
+            
+            <li class="nav-item fade-in" style="animation-delay: 0.3s">
+                <a href="{% url 'predictor:predict-kidney' %}" class="nav-link">
+                    <i class="fas fa-kidneys"></i>
+                    <span>Kidney Prediction</span>
+                </a>
+            </li>
+            
+            <li class="nav-item fade-in" style="animation-delay: 0.4s">
+                <a href="{% url 'predictor:predict-diabetes' %}" class="nav-link">
+                    <i class="fas fa-vial"></i>
+                    <span>Diabetes Prediction</span>
+                </a>
+            </li>
+            
+            <li class="nav-item mt-3 fade-in" style="animation-delay: 0.5s">
+                <a href="{% url 'predictor:logout' %}" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navigation -->
+        <nav class="navbar navbar-expand topbar mb-4 shadow">
+            <div class="container-fluid">
+                <button class="btn btn-link d-md-none me-3 text-dark" id="sidebarToggle">
+                    <i class="fa fa-bars"></i>
+                </button>
+                
+                <div class="d-flex align-items-center ms-auto">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <span class="me-2 d-none d-lg-inline small">{{ user.username }}</span>
+                            {% if profile.profile_picture %}
+                              <img src="{{ profile.profile_picture.url }}"  alt="Profile Picture" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg">
+                           {% else %}
+                             <div class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 shadow-lg">
+                            <i class="fas fa-user text-4xl"></i>
+                            </div>
+                          {% endif %}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end shadow">
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-user fa-sm me-2 text-muted"></i> Profile
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-cogs fa-sm me-2 text-muted"></i> Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'predictor:logout' %}">
+                                <i class="fas fa-sign-out-alt fa-sm me-2 text-muted"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container-fluid px-4">
+            <!-- Page Heading -->
+            <div class="d-sm-flex align-items-center justify-content-between mb-4 fade-in">
+                <h1 class="h3 mb-0 text-gray-800">Welcome to Your Health Dashboard</h1>
+                <a href="#" class="d-none d-sm-inline-block btn btn-primary shadow-sm">
+                    <i class="fas fa-download fa-sm me-1"></i> Generate Report
+                </a>
+            </div>
+            
+            <!-- Risk Level and Advice Card -->
+            <div class="row mb-4 fade-in" style="animation-delay: 0.2s">
+                <div class="col-12">
+                    <div class="card shadow risk-card 
+                        {% if 'High Risk' in risk_level %}high-risk
+                        {% elif 'Moderate Risk' in risk_level %}medium-risk
+                        {% else %}low-risk
+                        {% endif %}">
+                        <div class="card-body py-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-{% if 'High Risk' in risk_level %}exclamation-triangle{% elif 'Moderate Risk' in risk_level %}exclamation-circle{% else %}check-circle{% endif %} fa-2x me-3 text-{% if 'High Risk' in risk_level %}danger{% elif 'Moderate Risk' in risk_level %}warning{% else %}success{% endif %}"></i>
+                                        <div>
+                                            <h5 class="mb-1">Your Current Health Status</h5>
+                                            <p class="mb-0 text-muted">{{ risk_level }}</p>
+                                        </div>
+                                    </div>
+                                    <hr class="my-2">
+                                    <p class="mb-0"><strong>Recommendation:</strong> {{ advice }}</p>
+                                </div>
+                                <div class="col-md-4 mt-3 mt-md-0">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="health-metric border-primary">
+                                                <div class="metric-value">{{ total_predictions }}</div>
+                                                <div class="metric-label">Total Tests</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="health-metric border-success">
+                                                <div class="metric-value">{{ low_risk_heart|add:low_risk_kidney|add:low_risk_diabetes }}</div>
+                                                <div class="metric-label">Low Risk Results</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Overview Section -->
+            <div class="row mb-4 fade-in" style="animation-delay: 0.3s">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h5 class="m-0 font-weight-bold text-primary">Your Health Overview</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Heart Health -->
+                                <div class="col-md-4 mb-4">
+                                    <div class="chart-title">
+                                        <i class="fas fa-heart text-danger me-2"></i>
+                                        Heart Health Status
+                                    </div>
+                                    <div class="chart-container">
+                                        <canvas id="heartHealthChart"></canvas>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted">
+                                            {{ high_risk_heart }} high risk prediction{{ high_risk_heart|pluralize }}
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Kidney Health -->
+                                <div class="col-md-4 mb-4">
+                                    <div class="chart-title">
+                                        <i class="fas fa-kidneys text-info me-2"></i>
+                                        Kidney Health Status
+                                    </div>
+                                    <div class="chart-container">
+                                        <canvas id="kidneyHealthChart"></canvas>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted">
+                                            {{ high_risk_kidney }} high risk prediction{{ high_risk_kidney|pluralize }}
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Diabetes Health -->
+                                <div class="col-md-4 mb-4">
+                                    <div class="chart-title">
+                                        <i class="fas fa-vial text-secondary me-2"></i>
+                                        Diabetes Health Status
+                                    </div>
+                                    <div class="chart-container">
+                                        <canvas id="diabetesHealthChart"></canvas>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted">
+                                            {{ high_risk_diabetes }} high risk prediction{{ high_risk_diabetes|pluralize }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Metrics Section -->
+            <div class="row">
+                <!-- Heart Metrics -->
+                <div class="col-lg-6 mb-4 fade-in" style="animation-delay: 0.4s">
+                    <div class="card shadow">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center bg-white">
+                            <h5 class="m-0 font-weight-bold text-danger">
+                                <i class="fas fa-heart me-2"></i>
+                                Heart Health Metrics
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="chart-title">Cholesterol Levels Over Time</div>
+                                    <div class="chart-container">
+                                        <canvas id="cholesterolChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="chart-title">Blood Pressure Readings</div>
+                                    <div class="chart-container">
+                                        <canvas id="bloodPressureChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="chart-title">Heart Rate Measurements</div>
+                                    <div class="chart-container">
+                                        <canvas id="heartRateChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="chart-title">Age vs Heart Risk</div>
+                                    <div class="chart-container">
+                                        <canvas id="ageRiskChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Kidney & Diabetes Metrics -->
+                <div class="col-lg-6 mb-4 fade-in" style="animation-delay: 0.5s">
+                    <div class="card shadow">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center bg-white">
+                            <h5 class="m-0 font-weight-bold text-info">
+                                <i class="fas fa-kidneys me-2"></i>
+                                Kidney & Diabetes Metrics
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="chart-title">Blood Urea Levels</div>
+                                    <div class="chart-container">
+                                        <canvas id="ureaChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="chart-title">Creatinine Levels</div>
+                                    <div class="chart-container">
+                                        <canvas id="creatinineChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="chart-title">BMI Measurements</div>
+                                    <div class="chart-container">
+                                        <canvas id="bmiChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="chart-title">High Blood Pressure Occurrences</div>
+                                    <div class="chart-container">
+                                        <canvas id="hbpChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test History -->
+            <div class="row fade-in" style="animation-delay: 0.6s">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center bg-white">
+                            <h5 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-history me-2"></i>
+                                Your Test History Trend
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="height: 400px;">
+                                <canvas id="testHistoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle sidebar on mobile
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('active');
+                document.querySelector('.main-content').classList.toggle('active');
+            });
+            
+            // Convert Django template variables to JavaScript arrays
+            const heartAges = JSON.parse('{{ heart_ages|escapejs }}');
+            const chols = JSON.parse('{{ chols|escapejs }}');
+            const trestbps = JSON.parse('{{ trestbps|escapejs }}');
+            const thalach = JSON.parse('{{ thalach|escapejs }}');
+            const bloodUrea = JSON.parse('{{ blood_urea|escapejs }}');
+            const serumCreatinine = JSON.parse('{{ serum_creatinine|escapejs }}');
+            const bmiLevels = JSON.parse('{{ bmi_levels|escapejs }}');
+            const hbp = JSON.parse('{{ hbp|escapejs }}');
+            
+            // Helper function to create charts
+            function createChart(id, type, title, labels, datasets, options = {}) {
+                const ctx = document.getElementById(id).getContext('2d');
+                const defaultOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 20
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: title,
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== undefined) {
+                                        label += context.parsed.y;
+                                    } else {
+                                        label += context.parsed;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                };
+                
+                const mergedOptions = {...defaultOptions, ...options};
+                
+                return new Chart(ctx, {
+                    type: type,
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: mergedOptions
+                });
+            }
+            
+            // Health Status Charts
+            createChart('heartHealthChart', 'doughnut', '', ['Low Risk', 'High Risk'], [{
+                data: [{{ low_risk_heart }}, {{ high_risk_heart }}],
+                backgroundColor: ['#4e73df', '#e74a3b'],
+                borderWidth: 0
+            }], {
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            });
+            
+            createChart('kidneyHealthChart', 'doughnut', '', ['Low Risk', 'High Risk'], [{
+                data: [{{ low_risk_kidney }}, {{ high_risk_kidney }}],
+                backgroundColor: ['#36b9cc', '#e74a3b'],
+                borderWidth: 0
+            }], {
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            });
+            
+            createChart('diabetesHealthChart', 'doughnut', '', ['Low Risk', 'High Risk'], [{
+                data: [{{ low_risk_diabetes }}, {{ high_risk_diabetes }}],
+                backgroundColor: ['#1cc88a', '#e74a3b'],
+                borderWidth: 0
+            }], {
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            });
+            
+            // Heart Metrics Charts
+            createChart('cholesterolChart', 'line', '', heartAges, [{
+                label: 'Cholesterol (mg/dL)',
+                data: chols,
+                borderColor: '#e74a3b',
+                backgroundColor: 'rgba(231, 74, 59, 0.05)',
+                tension: 0.3,
+                fill: true
+            }]);
+            
+            createChart('bloodPressureChart', 'line', '', heartAges, [{
+                label: 'Resting BP (mm Hg)',
+                data: trestbps,
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                tension: 0.3,
+                fill: true
+            }]);
+            
+            createChart('heartRateChart', 'line', '', heartAges, [{
+                label: 'Max Heart Rate',
+                data: thalach,
+                borderColor: '#1cc88a',
+                backgroundColor: 'rgba(28, 200, 138, 0.05)',
+                tension: 0.3,
+                fill: true
+            }]);
+            
+            createChart('ageRiskChart', 'scatter', '', heartAges, [{
+                label: 'Age vs Risk',
+                data: heartAges.map((age, index) => ({
+                    x: age,
+                    y: chols[index] / 10 // Simplified risk indicator
+                })),
+                backgroundColor: '#f6c23e',
+                borderColor: '#f6c23e',
+                pointRadius: 6
+            }], {
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Risk Indicator'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Age'
+                        }
+                    }
+                }
+            });
+            
+            // Kidney & Diabetes Metrics
+            createChart('ureaChart', 'bar', '', bloodUrea, [{
+                label: 'Blood Urea (mg/dL)',
+                data: bloodUrea,
+                backgroundColor: 'rgba(54, 185, 204, 0.6)',
+                borderColor: 'rgba(54, 185, 204, 1)',
+                borderWidth: 1
+            }]);
+            
+            createChart('creatinineChart', 'bar', '', serumCreatinine, [{
+                label: 'Serum Creatinine (mg/dL)',
+                data: serumCreatinine,
+                backgroundColor: 'rgba(28, 200, 138, 0.6)',
+                borderColor: 'rgba(28, 200, 138, 1)',
+                borderWidth: 1
+            }]);
+            
+            createChart('bmiChart', 'line', '', bmiLevels, [{
+                label: 'BMI',
+                data: bmiLevels,
+                borderColor: '#858796',
+                backgroundColor: 'rgba(133, 135, 150, 0.05)',
+                tension: 0.3,
+                fill: true
+            }]);
+            
+            createChart('hbpChart', 'bar', '', ['High BP Occurrences'], [{
+                label: 'High Blood Pressure',
+                data: [hbp.filter(val => val === 1).length],
+                backgroundColor: '#e74a3b',
+                borderColor: '#e74a3b',
+                borderWidth: 1
+            }]);
+            
+            // Test History Chart
+            createChart('testHistoryChart', 'line', '', ['Heart', 'Kidney', 'Diabetes'], [
+                {
+                    label: 'Total Tests',
+                    data: [{{ total_heart_predictions }}, {{ total_kidney_predictions }}, {{ total_diabetes_predictions }}],
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'High Risk Results',
+                    data: [{{ high_risk_heart }}, {{ high_risk_kidney }}, {{ high_risk_diabetes }}],
+                    borderColor: '#e74a3b',
+                    backgroundColor: 'rgba(231, 74, 59, 0.05)',
+                    tension: 0.3,
+                    fill: true
+                }
+            ], {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

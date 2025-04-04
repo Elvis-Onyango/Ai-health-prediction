@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User | HealthPredict Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4e73df;
+            --success: #1cc88a;
+            --danger: #e74a3b;
+            --warning: #f6c23e;
+            --info: #36b9cc;
+            --secondary: #858796;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .card-header {
+            background-color: var(--primary);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+            padding: 1rem 1.35rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border: 1px solid #d1d3e2;
+            border-radius: 0.35rem;
+            padding: 0.75rem 1rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+        }
+        
+        .errorlist {
+            color: var(--danger);
+            list-style: none;
+            padding-left: 0;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+        }
+        
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="m-0">
+                                <i class="fas fa-user-edit me-2"></i>
+                                Edit User: {{ user.username }}
+                            </h4>
+                            <a href="{% url 'predictor:admin-dashboard' %}" class="btn btn-sm btn-light">
+                                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=4e73df&color=fff&size=120" 
+                                 alt="User Avatar" class="user-avatar mb-3">
+                            <h5>{{ user.get_full_name|default:user.username }}</h5>
+                            <p class="text-muted mb-0">Last login: {{ user.last_login|date:"M d, Y H:i"|default:"Never" }}</p>
+                        </div>
+                        
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="id_username" class="form-label">Username</label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <div class="errorlist">{{ form.username.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_email" class="form-label">Email</label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="errorlist">{{ form.email.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="id_first_name" class="form-label">First Name</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="errorlist">{{ form.first_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_last_name" class="form-label">Last Name</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="errorlist">{{ form.last_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_is_active" class="form-label">Status</label>
+                                <div class="form-check form-switch">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="id_is_active">
+                                        {% if user.is_active %}
+                                            Active (uncheck to deactivate)
+                                        {% else %}
+                                            Inactive (check to activate)
+                                        {% endif %}
+                                    </label>
+                                </div>
+                                {% if form.is_active.errors %}
+                                    <div class="errorlist">{{ form.is_active.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <a href="{% url 'predictor:admin-dashboard' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Add Bootstrap classes to form inputs
+        document.addEventListener("DOMContentLoaded", function() {
+            const inputs = document.querySelectorAll('input:not([type="checkbox"]), select, textarea');
+            inputs.forEach(input => {
+                input.classList.add('form-control');
+            });
+            
+            // Special handling for checkbox
+            const checkbox = document.getElementById('id_is_active');
+            if (checkbox) {
+                checkbox.classList.add('form-check-input');
+            }
+        });
+    </script>
+</body>
+</html>

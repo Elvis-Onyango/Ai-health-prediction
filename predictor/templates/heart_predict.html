@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Prediction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .section-title {
+            position: relative;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        .section-title:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #3b82f6, #10b981);
+            border-radius: 4px;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .animate-shadow {
+            transition: box-shadow 0.3s ease;
+        }
+        .animate-shadow:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-blue-500 to-purple-600 flex justify-center items-center min-h-screen p-4">
+
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-3xl animate-shadow">
+        <h2 class="text-3xl font-bold text-gray-800 text-center mb-6">💖 Heart Disease Prediction</h2>
+
+        {% if form.errors %}
+            <div class="p-4 mb-6 bg-red-50 border-l-4 border-red-400 rounded-lg">
+                <p class="text-sm text-red-600 font-medium">
+                    <strong>Please correct these errors:</strong>
+                </p>
+                <ul class="list-disc pl-5 mt-2 space-y-1">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ field|title }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if result %}
+            <div class="p-6 mb-6 rounded-lg shadow-md {% if result.prediction == 1 %}bg-red-50 border-l-4 border-red-400{% else %}bg-green-50 border-l-4 border-green-400{% endif %}">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        {% if result.prediction == 1 %}
+                            ⚠️
+                        {% else %}
+                            ✅
+                        {% endif %}
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-bold {% if result.prediction == 1 %}text-red-700{% else %}text-green-700{% endif %}">
+                            {% if result.prediction == 1 %}High Risk of Heart Disease{% else %}Low Risk of Heart Disease{% endif %}
+                        </h3>
+                        <div class="mt-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-{% if result.prediction == 1 %}red{% else %}green{% endif %}-500 h-2.5 rounded-full" 
+                                     style="width: {{ result.probability }}%"></div>
+                            </div>
+                            <p class="mt-1 text-sm {% if result.prediction == 1 %}text-red-600{% else %}text-green-600{% endif %}">
+                                Confidence: {{ result.probability }}%
+                            </p>
+                        </div>
+                        {% if result.prediction == 1 %}
+                            <p class="mt-2 text-sm text-red-600">
+                                We recommend consulting with a healthcare professional.
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-6" id="prediction-form" action="{% url 'predictor:predict-heart' %}">
+            {% csrf_token %}
+
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 section-title">Personal Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Age
+                        </label>
+                        <div class="relative">
+                            {{ form.age }}
+                            <span class="absolute right-3 top-3 text-gray-400 text-sm">yrs</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Gender
+                        </label>
+                        <div class="relative">
+                            {{ form.sex }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 section-title">Health Indicators</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Chest Pain Type
+                        </label>
+                        <div class="relative">
+                            {{ form.cp }}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Resting Blood Pressure
+                        </label>
+                        <div class="relative">
+                            {{ form.trestbps }}
+                            <span class="absolute right-3 top-3 text-gray-400 text-sm">mmHg</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Cholesterol Level
+                        </label>
+                        <div class="relative">
+                            {{ form.chol }}
+                            <span class="absolute right-3 top-3 text-gray-400 text-sm">mg/dL</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Fasting Blood Sugar > 120 mg/dl
+                        </label>
+                        <div class="relative">
+                            {{ form.fbs }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Resting ECG Results
+                        </label>
+                        <div class="relative">
+                            {{ form.restecg }}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Maximum Heart Rate Achieved
+                        </label>
+                        <div class="relative">
+                            {{ form.thalach }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Exercise-Induced Angina
+                        </label>
+                        <div class="relative">
+                            {{ form.exang }}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            ST Depression Induced by Exercise
+                        </label>
+                        <div class="relative">
+                            {{ form.oldpeak }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Slope of Peak Exercise ST Segment
+                        </label>
+                        <div class="relative">
+                            {{ form.slope }}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Number of Major Vessels (0-3)
+                        </label>
+                        <div class="relative">
+                            {{ form.ca }}
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Thalassemia
+                    </label>
+                    <div class="relative">
+                        {{ form.thal }}
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
+                🔍 Predict
+            </button>
+        </form>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'predictor:dashboard' %}" class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
+                🏠 Return to Dashboard
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

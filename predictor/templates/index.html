@@ -3,76 +3,748 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heart Disease Prediction</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>AI Health Predict - Multi-Disease Risk Assessment Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Custom Styles */
+        :root {
+            --primary: #4e73df;
+            --primary-light: #e8f0fe;
+            --secondary: #858796;
+            --success: #1cc88a;
+            --danger: #e74a3b;
+            --warning: #f6c23e;
+            --info: #36b9cc;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--dark);
+        }
+        
+        /* Navbar */
+        .navbar {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
         .navbar-brand {
+            font-weight: 700;
+            color: var(--primary);
             font-size: 1.5rem;
-            font-weight: bold;
         }
+        
+        /* Hero Section */
         .hero-section {
-            background: linear-gradient(135deg, #ff6b6b, #ffa5a5);
+            background: linear-gradient(135deg, var(--primary), #3a56c7);
             color: white;
-            padding: 100px 0;
+            padding: 6rem 0;
+            position: relative;
+            overflow: hidden;
         }
-        .hero-section h1 {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 20px;
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNwYXR0ZXJuKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==');
         }
-        .hero-section p {
-            font-size: 1.25rem;
-            margin-bottom: 30px;
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
         }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 2.5rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
         .btn-hero {
-            background-color: #fff;
-            color: #ff6b6b;
+            background-color: white;
+            color: var(--primary);
             font-size: 1.25rem;
-            padding: 10px 30px;
+            padding: 0.75rem 2.5rem;
             border-radius: 50px;
+            font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
+        
         .btn-hero:hover {
-            background-color: #ff6b6b;
-            color: #fff;
-            border: 2px solid #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
-        footer {
-            background-color: #343a40;
+        
+        /* Features Section */
+        .features-section {
+            padding: 5rem 0;
+            background-color: var(--light);
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            height: 100%;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background-color: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-size: 1.75rem;
+        }
+        
+        /* Dashboard Preview Section */
+        .dashboard-section {
+            padding: 5rem 0;
+            background: white;
+        }
+        
+        .dashboard-tabs .nav-link {
+            color: var(--secondary);
+            font-weight: 600;
+            border: none;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .dashboard-tabs .nav-link.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            background: transparent;
+        }
+        
+        .dashboard-img {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Disease Prediction Section */
+        .disease-section {
+            padding: 5rem 0;
+            background-color: var(--light);
+        }
+        
+        .disease-card {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .disease-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .disease-card-header {
+            padding: 1.5rem;
             color: white;
-            padding: 20px 0;
+            font-weight: 600;
+        }
+        
+        .heart-card {
+            background: linear-gradient(135deg, #e74a3b, #c23528);
+        }
+        
+        .kidney-card {
+            background: linear-gradient(135deg, #36b9cc, #2a96a6);
+        }
+        
+        .diabetes-card {
+            background: linear-gradient(135deg, #f6c23e, #d9a933);
+        }
+        
+        .disease-card-body {
+            padding: 1.5rem;
+            background: white;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 5rem 0;
+            background: white;
+        }
+        
+        .step-card {
+            position: relative;
+            padding-left: 4rem;
+            margin-bottom: 3rem;
+        }
+        
+        .step-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3rem;
+            height: 3rem;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        
+        /* Testimonials */
+        .testimonials {
+            padding: 5rem 0;
+            background-color: var(--light);
+        }
+        
+        .testimonial-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            border-top: 4px solid var(--primary);
+        }
+        
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+        
+        /* FAQ Section */
+        .faq-section {
+            padding: 5rem 0;
+            background: white;
+        }
+        
+        .accordion-button:not(.collapsed) {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, var(--primary), #3a56c7);
+            color: white;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 3rem 0 0;
+        }
+        
+        .footer-links h5 {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.25rem;
+            }
         }
     </style>
 </head>
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="#">HeartPredict</a>
-            <div class="d-flex">
-                <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">Login</a>
-                <a href="{% url 'signup' %}" class="btn btn-primary">Sign Up</a>
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot me-2"></i>AI Health Predict
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#dashboards">Dashboards</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#predictions">Predictions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testimonials">Testimonials</a>
+                    </li>
+                </ul>
+                <div class="d-flex ms-lg-3 mt-3 mt-lg-0">
+                    <a href="{% url 'predictor:login' %}" class="btn btn-outline-primary me-2">Login</a>
+                    <a href="{% url 'predictor:signup' %}" class="btn btn-primary">Sign Up</a>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <header class="hero-section text-center">
-        <div class="container">
-            <h1>Predict Heart Disease with AI</h1>
-            <p>Enter your health details and get an instant risk assessment.</p>
-            <a href="{% url 'predict' %}" class="btn btn-hero">Get Started</a>
+    <section class="hero-section text-center">
+        <div class="container hero-content">
+            <h1 class="hero-title">Comprehensive Health Risk Prediction</h1>
+            <p class="hero-subtitle">AI-powered assessments for heart disease, kidney disease, and diabetes with personalized dashboards for patients, doctors, and administrators.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'predictor:signup' %}" class="btn btn-hero">Get Started Free</a>
+                <a href="#how-it-works" class="btn btn-outline-light">Learn More</a>
+            </div>
         </div>
-    </header>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Why Choose AI Health Predict?</h2>
+                <p class="text-muted mx-auto" style="max-width: 700px;">Our platform combines medical expertise with cutting-edge AI to provide the most accurate multi-disease predictions available.</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>Advanced AI Technology</h3>
+                        <p class="text-muted">Our machine learning models are trained on thousands of medical cases across multiple disease categories for accurate predictions.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h3>Doctor-Approved</h3>
+                        <p class="text-muted">Developed in collaboration with specialists in cardiology, nephrology, and endocrinology for medical accuracy.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Secure & Private</h3>
+                        <p class="text-muted">HIPAA-compliant data protection ensures your health information remains confidential across all platforms.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Comprehensive Tracking</h3>
+                        <p class="text-muted">Monitor your health metrics over time with personalized dashboards for patients, doctors, and administrators.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3>Personalized Advice</h3>
+                        <p class="text-muted">Get customized recommendations based on your risk factors and health profile for multiple conditions.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-sync"></i>
+                        </div>
+                        <h3>Integrated Ecosystem</h3>
+                        <p class="text-muted">Seamless connection between patient self-monitoring, doctor oversight, and administrative management.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Preview Section -->
+    <section id="dashboards" class="dashboard-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Powerful Dashboards for Every User</h2>
+                <p class="text-muted mx-auto" style="max-width: 700px;">Comprehensive health tracking and management tools tailored to each user type.</p>
+            </div>
+            
+            <ul class="nav dashboard-tabs justify-content-center mb-4" id="dashboardTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="patient-tab" data-bs-toggle="tab" data-bs-target="#patient-tab-pane" type="button">
+                        <i class="fas fa-user me-2"></i>Patient Dashboard
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="doctor-tab" data-bs-toggle="tab" data-bs-target="#doctor-tab-pane" type="button">
+                        <i class="fas fa-user-md me-2"></i>Doctor Dashboard
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin-tab-pane" type="button">
+                        <i class="fas fa-user-shield me-2"></i>Admin Dashboard
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="dashboardTabContent">
+                <div class="tab-pane fade show active" id="patient-tab-pane" role="tabpanel">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 mb-4 mb-lg-0">
+                            <h3 class="fw-bold mb-3">Track Your Health Journey</h3>
+                            <ul class="list-unstyled">
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> View your disease risk predictions for heart, kidney, and diabetes</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Monitor health metrics over time with interactive charts</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Receive personalized health recommendations</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Track medication and appointment schedules</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Share data securely with your healthcare providers</li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-6">
+                            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                                 alt="Patient Dashboard" 
+                                 class="img-fluid dashboard-img">
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="doctor-tab-pane" role="tabpanel">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 mb-4 mb-lg-0">
+                            <h3 class="fw-bold mb-3">Comprehensive Patient Management</h3>
+                            <ul class="list-unstyled">
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Monitor all your patients' health status in one place</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> View detailed risk assessments and trends</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Receive alerts for concerning changes in patient health</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Provide remote consultations and recommendations</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Access comprehensive patient health histories</li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-6">
+                            <img src="https://images.unsplash.com/photo-1581595219315-a187dd40c322?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                                 alt="Doctor Dashboard" 
+                                 class="img-fluid dashboard-img">
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="admin-tab-pane" role="tabpanel">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 mb-4 mb-lg-0">
+                            <h3 class="fw-bold mb-3">Complete System Oversight</h3>
+                            <ul class="list-unstyled">
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Manage all users (patients, doctors, staff)</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> View system analytics and health trends</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Generate reports on disease prevalence</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Configure system settings and permissions</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Monitor system performance and security</li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-6">
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                                 alt="Admin Dashboard" 
+                                 class="img-fluid dashboard-img">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Disease Prediction Section -->
+    <section id="predictions" class="disease-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Comprehensive Disease Prediction</h2>
+                <p class="text-muted mx-auto" style="max-width: 700px;">Our AI models assess risk factors for multiple critical health conditions.</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="disease-card">
+                        <div class="disease-card-header heart-card">
+                            <i class="fas fa-heart me-2"></i> Heart Disease
+                        </div>
+                        <div class="disease-card-body">
+                            <p>Assess your risk for coronary artery disease, heart attacks, and other cardiovascular conditions based on:</p>
+                            <ul>
+                                <li>Blood pressure and cholesterol levels</li>
+                                <li>Family history and lifestyle factors</li>
+                                <li>ECG results and other diagnostic data</li>
+                            </ul>
+                            <a href="#" class="btn btn-outline-danger mt-2">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="disease-card">
+                        <div class="disease-card-header kidney-card">
+                            <i class="fas fa-kidneys me-2"></i> Kidney Disease
+                        </div>
+                        <div class="disease-card-body">
+                            <p>Evaluate your kidney function and risk for chronic kidney disease using:</p>
+                            <ul>
+                                <li>Blood urea and creatinine levels</li>
+                                <li>Urine analysis results</li>
+                                <li>Medical history and comorbidities</li>
+                            </ul>
+                            <a href="#" class="btn btn-outline-info mt-2">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="disease-card">
+                        <div class="disease-card-header diabetes-card">
+                            <i class="fas fa-vial me-2"></i> Diabetes
+                        </div>
+                        <div class="disease-card-body">
+                            <p>Predict your risk for Type 2 diabetes mellitus based on:</p>
+                            <ul>
+                                <li>Blood glucose and HbA1c levels</li>
+                                <li>BMI and physical activity</li>
+                                <li>Family history and dietary habits</li>
+                            </ul>
+                            <a href="#" class="btn btn-outline-warning mt-2">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">How AI Health Predict Works</h2>
+                <p class="text-muted mx-auto" style="max-width: 700px;">Our simple process makes comprehensive health assessment accessible to everyone.</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h4>Create Your Account</h4>
+                        <p class="text-muted">Sign up as a patient, doctor, or administrator based on your needs. Our system will guide you through the appropriate onboarding process.</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h4>Complete Your Health Profile</h4>
+                        <p class="text-muted">Provide your health information. Patients enter their metrics, doctors set up their practice information, and administrators configure system settings.</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h4>Get Your AI Assessment</h4>
+                        <p class="text-muted">Our system analyzes your data and provides risk assessments for heart disease, kidney disease, and diabetes (for patients) or the appropriate dashboard view for doctors and admins.</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h4>Monitor and Manage</h4>
+                        <p class="text-muted">Use your personalized dashboard to track health metrics (patients), monitor patients (doctors), or oversee the entire system (administrators).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">What Our Users Say</h2>
+                <p class="text-muted mx-auto" style="max-width: 700px;">Hear from patients, doctors, and administrators using AI Health Predict.</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://randomuser.me/api/portraits/women/45.jpg" 
+                                 alt="SEsther K." 
+                                 class="testimonial-avatar">
+                            <div>
+                                <h5 class="mb-0">Esther K.</h5>
+                                <small class="text-muted">Patient, Age 22</small>
+                            </div>
+                        </div>
+                        <p class="mb-0">"The comprehensive dashboard helps me track all my health metrics in one place. The diabetes prediction alerted me to get checked early!"</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" 
+                                 alt="Dr. Michael O." 
+                                 class="testimonial-avatar">
+                            <div>
+                                <h5 class="mb-0">Dr. Michael O.</h5>
+                                <small class="text-muted">Cardiologist</small>
+                            </div>
+                        </div>
+                        <p class="mb-0">"The doctor dashboard gives me a complete view of my patients' multi-system health risks, saving me hours of manual chart review."</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://randomuser.me/api/portraits/women/68.jpg" 
+                                 alt="Priya K." 
+                                 class="testimonial-avatar">
+                            <div>
+                                <h5 class="mb-0">Priya K.</h5>
+                                <small class="text-muted">Clinic Administrator</small>
+                            </div>
+                        </div>
+                        <p class="mb-0">"The admin tools help me manage our entire practice efficiently while ensuring HIPAA compliance across all patient data."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section text-center">
+        <div class="container">
+            <h2 class="text-white fw-bold mb-4">Start Your Health Journey Today</h2>
+            <p class="text-white-50 mb-5 mx-auto" style="max-width: 600px;">Join thousands of users benefiting from our comprehensive AI health prediction platform.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'predictor:signup' %}" class="btn btn-light btn-lg px-4 py-2">Sign Up Free</a>
+                <a href="#features" class="btn btn-outline-light btn-lg px-4 py-2">Explore Features</a>
+            </div>
+        </div>
+    </section>
 
     <!-- Footer -->
-    <footer class="text-center py-4">
+    <footer>
         <div class="container">
-            &copy; 2025 HeartPredict. All Rights Reserved.
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="text-white mb-4">
+                        <i class="fas fa-robot me-2"></i>AI Health Predict
+                    </h5>
+                    <p class="text-muted">Comprehensive AI-powered health risk assessment for heart disease, kidney disease, and diabetes with specialized dashboards for all users.</p>
+                    <div class="d-flex gap-3 mt-4">
+                        <a href="#" class="text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                    <h5 class="text-white mb-4">Product</h5>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#dashboards">Dashboards</a></li>
+                        <li><a href="#predictions">Predictions</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                    <h5 class="text-white mb-4">For Users</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Patients</a></li>
+                        <li><a href="#">Doctors</a></li>
+                        <li><a href="#">Administrators</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                    <h5 class="text-white mb-4">Resources</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <h5 class="text-white mb-4">Company</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Press</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom text-center text-md-start">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="text-muted mb-3 mb-md-0">&copy; 2025 AI Health Predict. All rights reserved.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-shield-alt me-1"></i> HIPAA Compliant & Secure
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
