@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: heart-disease-prediction   # <-- your app's name here
+    env: python
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: gunicorn heart_disease_prediction.wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        fromSecret: django_secret_key
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "heart-disease-prediction.onrender.com"
