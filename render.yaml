@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: heart-disease-prediction   # <-- your app's name here
+    name: heart-disease-prediction   
     env: python
     plan: free
     branch: main
@@ -12,4 +12,4 @@ services:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: "heart-disease-prediction.onrender.com"
+        value: "ai-health-prediction.onrender.com"
