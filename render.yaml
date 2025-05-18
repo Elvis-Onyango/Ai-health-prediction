@@ -12,4 +12,5 @@ services:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: "ai-health-prediction.onrender.com"
+        value: "ai-health-prediction.onrender.com,www.ai-health-prediction.onrender.com,127.0.0.1,localhost"
+
