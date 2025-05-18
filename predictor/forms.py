@@ -315,6 +315,7 @@ class HeartDiseaseForm(forms.ModelForm):
 
 
 from django import forms
+from django.core.validators import MinValueValidator
 from .models import DiabetesPrediction
 
 class DiabetesForm(forms.ModelForm):
@@ -325,7 +326,7 @@ class DiabetesForm(forms.ModelForm):
         choices=YES_NO_CHOICES,
         widget=forms.RadioSelect(attrs={'class': 'form-radio'}),
         label='High Blood Pressure',
-        initial=0  # Matches model default
+        initial=0
     )
     
     HighChol = forms.ChoiceField(
@@ -456,7 +457,7 @@ class DiabetesForm(forms.ModelForm):
     )
     
     # Demographic fields
-    SEX_CHOICES = [(0, 'Female'), (1, 'Male')]  # Corrected to match model
+    SEX_CHOICES = [(0, 'Female'), (1, 'Male')]
     Sex = forms.ChoiceField(
         choices=SEX_CHOICES,
         widget=forms.RadioSelect(attrs={'class': 'form-radio'}),
@@ -476,19 +477,37 @@ class DiabetesForm(forms.ModelForm):
         help_text='Please enter your exact age'
     )
     
-    EDUCATION_LEVELS = [(i, str(i)) for i in range(1, 7)]
+    # Education Levels
+    EDUCATION_LEVELS = [
+        (1, 'No formal education'),
+        (2, 'Primary school'),
+        (3, 'Secondary school'),
+        (4, 'High school diploma'),
+        (5, 'Bachelor\'s degree'),
+        (6, 'Postgraduate degree')
+    ]
     Education = forms.ChoiceField(
         choices=EDUCATION_LEVELS,
         widget=forms.Select(attrs={'class': 'form-select'}),
-        label='Education Level (1-6)',
+        label='Highest Education Level',
         initial=4
     )
     
-    INCOME_LEVELS = [(i, str(i)) for i in range(1, 9)]
+    # Income Levels
+    INCOME_LEVELS = [
+        (1, 'Less than Ksh 10,000'),
+        (2, 'Ksh 10,000 - Ksh 20,000'),
+        (3, 'Ksh 20,001 - Ksh 35,000'),
+        (4, 'Ksh 35,001 - Ksh 50,000'),
+        (5, 'Ksh 50,001 - Ksh 75,000'),
+        (6, 'Ksh 75,001 - Ksh 100,000'),
+        (7, 'Ksh 100,001 - Ksh 150,000'),
+        (8, 'More than Ksh 150,000')
+    ]
     Income = forms.ChoiceField(
         choices=INCOME_LEVELS,
         widget=forms.Select(attrs={'class': 'form-select'}),
-        label='Income Level (1-8)',
+        label='Annual Household Income',
         initial=3
     )
 
